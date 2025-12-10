@@ -78,7 +78,29 @@
             <artifactId>graphhopper-web</artifactId>
             <version>9.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.graphhopper</groupId>
+            <artifactId>graphhopper-core</artifactId>
+            <version>9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.graphhopper</groupId>
+            <artifactId>graphhopper-reader-osm</artifactId>
+            <version>9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.graphhopper</groupId>
+            <artifactId>graphhopper-web</artifactId>
+            <version>9.0</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>graphhopper-releases</id>
+            <url>https://oss.jfrog.org/artifactory/libs-release</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>

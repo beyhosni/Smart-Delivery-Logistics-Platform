@@ -1,0 +1,157 @@
+name: CI/CD Pipeline Simple
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      rabbitmq:
+        image: rabbitmq:3-management
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5672:5672
+          - 15672:15692
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 23
+      uses: actions/setup-java@v3
+      with:
+        java-version: '23'
+        distribution: 'temurin'
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2-
+    - name: Run backend tests
+      run: |
+        cd backend
+        find . -name "pom.xml" -type f | while read pom; do
+          dir=$(dirname "$pom")
+          echo "Testing module in $dir"
+          cd "$dir"
+          mvn clean test
+          cd - > /dev/null
+        done
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+    - name: Run tests
+      run: |
+        cd frontend
+        npm run test:ci
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+  build-and-push:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+    - name: Build and push Docker images
+      run: |
+        # Build Gateway Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ steps.meta.outputs.tags }} ./backend/gateway-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/gateway-service:${{ steps.meta.outputs.tags }}
+
+        # Build Delivery Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/delivery-service:${{ steps.meta.outputs.tags }} ./backend/delivery-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/delivery-service:${{ steps.meta.outputs.tags }}
+
+        # Build Dispatcher Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/dispatcher-service:${{ steps.meta.outputs.tags }} ./backend/dispatcher-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/dispatcher-service:${{ steps.meta.outputs.tags }}
+
+        # Build Tracking Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/tracking-service:${{ steps.meta.outputs.tags }} ./backend/tracking-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/tracking-service:${{ steps.meta.outputs.tags }}
+
+        # Build Notification Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/notification-service:${{ steps.meta.outputs.tags }} ./backend/notification-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/notification-service:${{ steps.meta.outputs.tags }}
+
+        # Build Route Optimizer Service
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/route-optimizer-service:${{ steps.meta.outputs.tags }} ./backend/route-optimizer-service
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/route-optimizer-service:${{ steps.meta.outputs.tags }}
+
+        # Build Frontend
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ steps.meta.outputs.tags }} ./frontend
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend:${{ steps.meta.outputs.tags }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Deploy to production
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USERNAME }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          cd /opt/smart-delivery
+          docker-compose pull
+          docker-compose up -d
+          docker system prune -f
