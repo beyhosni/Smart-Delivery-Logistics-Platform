@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  delivery-service:
+    build: ./backend/delivery-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/delivery_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+
+  tracking-service:
+    build: ./backend/tracking-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATA_MONGODB_HOST=mongodb
+
+  route-optimizer-service:
+    build: ./backend/route-optimizer-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/route_optimizer_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+
+  dispatcher-service:
+    build: ./backend/dispatcher-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dispatcher_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+
+  notification-service:
+    build: ./backend/notification-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+
+  gateway-service:
+    build: ./backend/gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - delivery-service
+      - tracking-service
+      - route-optimizer-service
+      - dispatcher-service
+      - notification-service
+    environment:
+      - DELIVERY_SERVICE_URL=http://delivery-service:8081
+      - TRACKING_SERVICE_URL=http://tracking-service:8083
+      - ROUTE_OPTIMIZER_SERVICE_URL=http://route-optimizer-service:8085
+      - DISPATCHER_SERVICE_URL=http://dispatcher-service:8082
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8084
+
+volumes:
+  postgres_data:
+  mongodb_data:
