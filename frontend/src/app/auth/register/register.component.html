@@ -1,0 +1,100 @@
+<div class="register-container">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow">
+        <div class="card-body p-4">
+          <div class="text-center mb-4">
+            <h2 class="fw-bold">Inscription</h2>
+            <p class="text-muted">Créez votre compte Smart Delivery</p>
+          </div>
+
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="firstName" formControlName="firstName" 
+                       [ngClass]="{ 'is-invalid': submitted && f['firstName'].errors }">
+                <div *ngIf="submitted && f['firstName'].errors" class="invalid-feedback">
+                  <div *ngIf="f['firstName'].errors['required']">Le prénom est requis</div>
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="lastName" formControlName="lastName" 
+                       [ngClass]="{ 'is-invalid': submitted && f['lastName'].errors }">
+                <div *ngIf="submitted && f['lastName'].errors" class="invalid-feedback">
+                  <div *ngIf="f['lastName'].errors['required']">Le nom est requis</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Adresse e-mail</label>
+              <input type="email" class="form-control" id="email" formControlName="email" 
+                     [ngClass]="{ 'is-invalid': submitted && f['email'].errors }">
+              <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                <div *ngIf="f['email'].errors['required']">L'adresse e-mail est requise</div>
+                <div *ngIf="f['email'].errors['email']">Veuillez entrer une adresse e-mail valide</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Numéro de téléphone</label>
+              <input type="tel" class="form-control" id="phone" formControlName="phone" 
+                     [ngClass]="{ 'is-invalid': submitted && f['phone'].errors }">
+              <div *ngIf="submitted && f['phone'].errors" class="invalid-feedback">
+                <div *ngIf="f['phone'].errors['required']">Le numéro de téléphone est requis</div>
+                <div *ngIf="f['phone'].errors['pattern']">Veuillez entrer un numéro de téléphone valide (10 chiffres)</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Mot de passe</label>
+              <input type="password" class="form-control" id="password" formControlName="password" 
+                     [ngClass]="{ 'is-invalid': submitted && f['password'].errors }">
+              <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+                <div *ngIf="f['password'].errors['required']">Le mot de passe est requis</div>
+                <div *ngIf="f['password'].errors['minlength']">Le mot de passe doit contenir au moins 6 caractères</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label">Confirmer le mot de passe</label>
+              <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword" 
+                     [ngClass]="{ 'is-invalid': submitted && f['confirmPassword'].errors }">
+              <div *ngIf="submitted && f['confirmPassword'].errors" class="invalid-feedback">
+                <div *ngIf="f['confirmPassword'].errors['required']">La confirmation du mot de passe est requise</div>
+                <div *ngIf="f['confirmPassword'].errors['mustMatch']">Les mots de passe ne correspondent pas</div>
+              </div>
+            </div>
+
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+              <label class="form-check-label" for="agreeTerms">
+                J'accepte les <a href="#" class="text-decoration-none">conditions d'utilisation</a> et la <a href="#" class="text-decoration-none">politique de confidentialité</a>
+              </label>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                S'inscrire
+              </button>
+            </div>
+          </form>
+
+          <div *ngIf="error" class="alert alert-danger mt-3">
+            {{ error }}
+          </div>
+
+          <hr class="my-4">
+
+          <div class="text-center">
+            <p class="mb-0">Vous avez déjà un compte ? <a routerLink="/login" class="text-decoration-none">Se connecter</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
