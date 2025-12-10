@@ -1,0 +1,90 @@
+<header class="main-header">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" routerLink="/">
+        <i class="fas fa-shipping-fast me-2"></i>Smart Delivery
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" routerLinkActive="active">Accueil</a>
+          </li>
+          <li class="nav-item" *ngIf="isLoggedIn">
+            <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">Tableau de bord</a>
+          </li>
+          <li class="nav-item" *ngIf="isLoggedIn">
+            <a class="nav-link" routerLink="/deliveries" routerLinkActive="active">Mes livraisons</a>
+          </li>
+          <li class="nav-item" *ngIf="isLoggedIn">
+            <a class="nav-link" routerLink="/deliveries/new" routerLinkActive="active">Nouvelle livraison</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item" *ngIf="!isLoggedIn">
+            <a class="nav-link" routerLink="/login" routerLinkActive="active">Connexion</a>
+          </li>
+          <li class="nav-item" *ngIf="!isLoggedIn">
+            <a class="nav-link" routerLink="/register" routerLinkActive="active">Inscription</a>
+          </li>
+          <li class="nav-item dropdown" *ngIf="isLoggedIn">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+               data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-user-circle me-1"></i>Mon compte
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" routerLink="/profile" routerLinkActive="active">Profil</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="logout()">Déconnexion</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main class="main-content">
+  <div class="container py-4">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<footer class="main-footer bg-light py-4 mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h5>Smart Delivery Platform</h5>
+        <p>La solution moderne pour la gestion de vos livraisons.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Liens utiles</h5>
+        <ul class="list-unstyled">
+          <li><a routerLink="/">Accueil</a></li>
+          <li><a routerLink="/about">À propos</a></li>
+          <li><a routerLink="/contact">Contact</a></li>
+          <li><a routerLink="/help">Aide</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Contact</h5>
+        <address>
+          <strong>Smart Delivery Platform</strong><br>
+          123 Rue de la Livraison<br>
+          75001 Paris, France<br>
+          <i class="fas fa-phone"></i> +33 1 23 45 67 89<br>
+          <i class="fas fa-envelope"></i> contact@smartdelivery.fr
+        </address>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-12 text-center">
+        <p class="mb-0">&copy; {{ currentYear }} Smart Delivery Platform. Tous droits réservés.</p>
+      </div>
+    </div>
+  </div>
+</footer>

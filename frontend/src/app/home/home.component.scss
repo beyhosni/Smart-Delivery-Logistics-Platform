@@ -1,0 +1,68 @@
+// Styles pour la section hero
+.hero-section {
+  background: linear-gradient(135deg, #0d6efd 0%, #004085 100%);
+
+  img {
+    max-height: 400px;
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+// Styles pour la section des fonctionnalités
+.features-section {
+  .card {
+    transition: transform 0.3s, box-shadow 0.3s;
+
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+
+  .feature-icon {
+    transition: transform 0.3s;
+  }
+
+  .card:hover .feature-icon {
+    transform: scale(1.1);
+  }
+}
+
+// Styles pour la section "Comment ça marche"
+.how-it-works-section {
+  .step-number {
+    transition: transform 0.3s;
+  }
+
+  .col-md-3:hover .step-number {
+    transform: scale(1.1);
+  }
+}
+
+// Styles pour la section témoignages
+.testimonials-section {
+  .card {
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: translateY(-5px);
+    }
+  }
+}
+
+// Styles pour la section CTA
+.cta-section {
+  background: linear-gradient(135deg, #0d6efd 0%, #004085 100%);
+}
