@@ -1,0 +1,110 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: registry.gitlab.com
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+# Cache les dépendances Maven entre les jobs
+cache:
+  paths:
+    - .m2/repository
+
+# Template pour les jobs de test et build
+.test_template: &test_template
+  image: maven:3.8.6-openjdk-23
+  stage: test
+  services:
+    - postgres:15
+      variables:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: test_db
+    - rabbitmq:3-management
+      variables:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+  variables:
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/test_db
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: password
+    SPRING_RABBITMQ_HOST: rabbitmq
+    SPRING_RABBITMQ_PORT: 5672
+    SPRING_RABBITMQ_USERNAME: guest
+    SPRING_RABBITMQ_PASSWORD: guest
+  script:
+    - cd backend
+    - find . -name "pom.xml" -type f | while read pom; do
+        dir=$(dirname "$pom")
+        echo "Testing module in $dir"
+        cd "$dir"
+        mvn clean test
+      done
+
+# Template pour les jobs de build Docker
+.docker_build_template: &docker_build_template
+  image: docker:23.0.1
+  stage: build
+  services:
+    - docker:dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - cd backend
+    - find . -name "pom.xml" -type f | while read pom; do
+        dir=$(dirname "$pom")
+        module_name=$(basename "$dir")
+        echo "Building Docker image for $module_name"
+        cd "$dir"
+        docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG-$module_name .
+        docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG-$module_name
+      done
+    - cd ../frontend
+    - echo "Building Docker image for frontend"
+    - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG-frontend .
+    - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG-frontend
+
+# Job de test pour le backend
+test-backend:
+  <<: *test_template
+  only:
+    - merge_requests
+    - main
+    - develop
+
+# Job de test pour le frontend
+test-frontend:
+  image: node:18
+  stage: test
+  script:
+    - cd frontend
+    - npm ci
+    - npm run test:ci
+
+# Job de build pour tous les services
+build-services:
+  <<: *docker_build_template
+  only:
+    - main
+    - develop
+
+# Job de déploiement en production
+deploy-production:
+  image: alpine:latest
+  stage: deploy
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_SSH_PRIVATE_KEY" | tr -d '' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
+  script:
+    - ssh $DEPLOY_USER@$DEPLOY_SERVER "cd /opt/smart-delivery && docker-compose pull && docker-compose up -d && docker system prune -f"
+  only:
+    - main
+  when: manual

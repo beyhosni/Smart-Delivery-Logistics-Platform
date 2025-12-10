@@ -19,13 +19,18 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
 
   mongodb:
     image: mongo:6
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin_password
     volumes:
       - mongodb_data:/data/db
+      - ./database/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
 
   delivery-service:
     build: ./backend/delivery-service

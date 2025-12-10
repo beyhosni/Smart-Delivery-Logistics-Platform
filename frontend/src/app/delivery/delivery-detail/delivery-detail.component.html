@@ -1,0 +1,146 @@
+<div class="delivery-detail-container">
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="delivery && !loading" class="row">
+    <!-- Détails principaux -->
+    <div class="col-lg-8 mb-4">
+      <div class="card shadow">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+          <h6 class="m-0 font-weight-bold text-primary">Détails de la livraison</h6>
+          <span class="badge {{ getStatusBadgeClass(delivery.status) }}">
+            {{ getStatusText(delivery.status) }}
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <h6 class="text-muted">ID de livraison</h6>
+              <p>{{ delivery.id }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <h6 class="text-muted">Date de création</h6>
+              <p>{{ delivery.createdAt | date:'full' }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <h6 class="text-muted">Priorité</h6>
+              <span class="badge {{ getPriorityBadgeClass(delivery.priority) }}">
+                {{ getPriorityText(delivery.priority) }}
+              </span>
+            </div>
+            <div class="col-md-6 mb-3" *ngIf="delivery.requestedDeliveryTime">
+              <h6 class="text-muted">Date de livraison souhaitée</h6>
+              <p>{{ delivery.requestedDeliveryTime | date:'full' }}</p>
+            </div>
+          </div>
+
+          <!-- Adresses -->
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <h6 class="mb-3">Adresse de ramassage</h6>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <p class="mb-1"><strong>{{ delivery.pickupAddress.street }}</strong></p>
+                  <p class="mb-1">{{ delivery.pickupAddress.postalCode }} {{ delivery.pickupAddress.city }}</p>
+                  <p class="mb-0">{{ delivery.pickupAddress.country }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="mb-3">Adresse de livraison</h6>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <p class="mb-1"><strong>{{ delivery.deliveryAddress.street }}</strong></p>
+                  <p class="mb-1">{{ delivery.deliveryAddress.postalCode }} {{ delivery.deliveryAddress.city }}</p>
+                  <p class="mb-0">{{ delivery.deliveryAddress.country }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Détails du colis -->
+          <div class="row mt-4">
+            <div class="col-12">
+              <h6 class="mb-3">Détails du colis</h6>
+              <div class="card bg-light">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <p class="mb-1"><strong>Poids:</strong> {{ delivery.packageDetails.weight }} kg</p>
+                    </div>
+                    <div class="col-md-3">
+                      <p class="mb-1"><strong>Dimensions:</strong> {{ delivery.packageDetails.dimensions.length }}x{{ delivery.packageDetails.dimensions.width }}x{{ delivery.packageDetails.dimensions.height }} cm</p>
+                    </div>
+                    <div class="col-md-3">
+                      <p class="mb-1"><strong>Fragile:</strong> {{ delivery.packageDetails.fragile ? 'Oui' : 'Non' }}</p>
+                    </div>
+                    <div class="col-md-3" *ngIf="delivery.packageDetails.description">
+                      <p class="mb-1"><strong>Description:</strong> {{ delivery.packageDetails.description }}</p>
+                    </div>
+                  </div>
+                  <div class="mt-2" *ngIf="delivery.packageDetails.specialInstructions">
+                    <p class="mb-0"><strong>Instructions spéciales:</strong> {{ delivery.packageDetails.specialInstructions }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carte de suivi -->
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Suivi en temps réel</h6>
+        </div>
+        <div class="card-body">
+          <div class="map-container mb-3" style="height: 300px; background-color: #f8f9fc; border-radius: 0.25rem; display: flex; align-items: center; justify-content: center;">
+            <div *ngIf="!currentLocation" class="text-center">
+              <i class="fas fa-map-marked-alt fa-3x text-muted mb-2"></i>
+              <p class="text-muted">Position non disponible</p>
+            </div>
+            <div *ngIf="currentLocation" class="text-center">
+              <i class="fas fa-map-marker-alt fa-3x text-primary mb-2"></i>
+              <p>Position actuelle</p>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-primary" (click)="trackDelivery()">
+              <i class="fas fa-map-marked-alt me-1"></i> Suivre la livraison
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card shadow mt-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-outline-primary" (click)="editDelivery()" [disabled]="delivery.status === 'DELIVERED' || delivery.status === 'CANCELLED'">
+              <i class="fas fa-edit me-1"></i> Modifier
+            </button>
+            <button type="button" class="btn btn-outline-danger" (click)="cancelDelivery()" [disabled]="delivery.status === 'DELIVERED' || delivery.status === 'CANCELLED'">
+              <i class="fas fa-times me-1"></i> Annuler
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="goBack()">
+              <i class="fas fa-arrow-left me-1"></i> Retour
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

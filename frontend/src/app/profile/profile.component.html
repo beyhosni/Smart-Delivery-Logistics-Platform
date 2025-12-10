@@ -1,0 +1,147 @@
+<div class="profile-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Messages de succès ou d'erreur -->
+      <div *ngIf="success" class="alert alert-success">
+        {{ success }}
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <!-- Onglets -->
+      <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">
+            Informations du profil
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab" aria-controls="password" aria-selected="false">
+            Changer le mot de passe
+          </button>
+        </li>
+      </ul>
+
+      <!-- Contenu des onglets -->
+      <div class="tab-content" id="profileTabContent">
+        <!-- Onglet Informations du profil -->
+        <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="card shadow">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Informations du profil</h6>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="firstName" class="form-label">Prénom</label>
+                    <input type="text" class="form-control" id="firstName" formControlName="firstName" 
+                           [ngClass]="{ 'is-invalid': submittedProfile && fProfile['firstName'].errors }">
+                    <div *ngIf="submittedProfile && fProfile['firstName'].errors" class="invalid-feedback">
+                      <div *ngIf="fProfile['firstName'].errors['required']">Le prénom est requis</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="lastName" class="form-label">Nom</label>
+                    <input type="text" class="form-control" id="lastName" formControlName="lastName" 
+                           [ngClass]="{ 'is-invalid': submittedProfile && fProfile['lastName'].errors }">
+                    <div *ngIf="submittedProfile && fProfile['lastName'].errors" class="invalid-feedback">
+                      <div *ngIf="fProfile['lastName'].errors['required']">Le nom est requis</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="email" class="form-label">Adresse e-mail</label>
+                  <input type="email" class="form-control" id="email" formControlName="email" 
+                         [ngClass]="{ 'is-invalid': submittedProfile && fProfile['email'].errors }">
+                  <div *ngIf="submittedProfile && fProfile['email'].errors" class="invalid-feedback">
+                    <div *ngIf="fProfile['email'].errors['required']">L'adresse e-mail est requise</div>
+                    <div *ngIf="fProfile['email'].errors['email']">Veuillez entrer une adresse e-mail valide</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="phone" class="form-label">Numéro de téléphone</label>
+                  <input type="tel" class="form-control" id="phone" formControlName="phone" 
+                         [ngClass]="{ 'is-invalid': submittedProfile && fProfile['phone'].errors }">
+                  <div *ngIf="submittedProfile && fProfile['phone'].errors" class="invalid-feedback">
+                    <div *ngIf="fProfile['phone'].errors['required']">Le numéro de téléphone est requis</div>
+                    <div *ngIf="fProfile['phone'].errors['pattern']">Veuillez entrer un numéro de téléphone valide (10 chiffres)</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="address" class="form-label">Adresse</label>
+                  <textarea class="form-control" id="address" formControlName="address" rows="3"
+                            [ngClass]="{ 'is-invalid': submittedProfile && fProfile['address'].errors }"></textarea>
+                  <div *ngIf="submittedProfile && fProfile['address'].errors" class="invalid-feedback">
+                    <div *ngIf="fProfile['address'].errors['required']">L'adresse est requise</div>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary" [disabled]="loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Enregistrer les modifications
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onglet Changer le mot de passe -->
+        <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+          <div class="card shadow">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Changer le mot de passe</h6>
+            </div>
+            <div class="card-body">
+              <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+                <div class="mb-3">
+                  <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+                  <input type="password" class="form-control" id="currentPassword" formControlName="currentPassword" 
+                         [ngClass]="{ 'is-invalid': submittedPassword && fPassword['currentPassword'].errors }">
+                  <div *ngIf="submittedPassword && fPassword['currentPassword'].errors" class="invalid-feedback">
+                    <div *ngIf="fPassword['currentPassword'].errors['required']">Le mot de passe actuel est requis</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                  <input type="password" class="form-control" id="newPassword" formControlName="newPassword" 
+                         [ngClass]="{ 'is-invalid': submittedPassword && fPassword['newPassword'].errors }">
+                  <div *ngIf="submittedPassword && fPassword['newPassword'].errors" class="invalid-feedback">
+                    <div *ngIf="fPassword['newPassword'].errors['required']">Le nouveau mot de passe est requis</div>
+                    <div *ngIf="fPassword['newPassword'].errors['minlength']">Le mot de passe doit contenir au moins 6 caractères</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="confirmPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                  <input type="password" class="form-control" id="confirmPassword" formControlName="confirmPassword" 
+                         [ngClass]="{ 'is-invalid': submittedPassword && fPassword['confirmPassword'].errors }">
+                  <div *ngIf="submittedPassword && fPassword['confirmPassword'].errors" class="invalid-feedback">
+                    <div *ngIf="fPassword['confirmPassword'].errors['required']">La confirmation du mot de passe est requise</div>
+                    <div *ngIf="fPassword['confirmPassword'].errors['mustMatch']">Les mots de passe ne correspondent pas</div>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                  <button type="submit" class="btn btn-primary" [disabled]="loading">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Changer le mot de passe
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

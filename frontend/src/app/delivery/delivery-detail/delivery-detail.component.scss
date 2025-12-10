@@ -1,0 +1,61 @@
+.delivery-detail-container {
+  min-height: calc(100vh - 200px);
+  padding: 2rem 0;
+
+  .card {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+
+    .card-header {
+      background-color: #f8f9fc;
+      border-bottom: 1px solid #e3e6f0;
+    }
+
+    .card-body {
+      h6 {
+        color: #5a5c69;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        color: #858796;
+      }
+    }
+  }
+
+  .map-container {
+    border-radius: 0.25rem;
+    overflow: hidden;
+  }
+
+  .btn {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Animation pour le spinner
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: text-bottom;
+  border: 0.15em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+}

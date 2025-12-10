@@ -1,0 +1,147 @@
+<div class="delivery-list-container">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Mes livraisons</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group me-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary">
+          <i class="fas fa-download me-1"></i> Exporter
+        </button>
+      </div>
+      <button type="button" class="btn btn-sm btn-primary" routerLink="/deliveries/new">
+        <i class="fas fa-plus me-1"></i> Nouvelle livraison
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Filtres et recherche -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Filtres et recherche</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="searchInput" class="form-label">Recherche</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="ID ou nom du destinataire" 
+                   [(ngModel)]="searchTerm" (keyup.enter)="onSearch()">
+            <button class="btn btn-outline-secondary" type="button" (click)="onSearch()">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="statusFilter" class="form-label">Statut</label>
+          <select class="form-select" id="statusFilter" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+            <option value="">Tous les statuts</option>
+            <option value="CREATED">Créée</option>
+            <option value="ASSIGNED">Assignée</option>
+            <option value="IN_TRANSIT">En transit</option>
+            <option value="DELIVERED">Livrée</option>
+            <option value="CANCELLED">Annulée</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="dateFilter" class="form-label">Date</label>
+          <input type="date" class="form-control" id="dateFilter" [(ngModel)]="dateFilter" (change)="onFilterChange()">
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <button class="btn btn-secondary w-100" (click)="searchTerm=''; statusFilter=''; dateFilter=''; onFilterChange();">
+            <i class="fas fa-times me-1"></i> Réinitialiser
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tableau des livraisons -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Liste des livraisons</h6>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive" *ngIf="!loading">
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Destinataire</th>
+              <th>Date de création</th>
+              <th>Statut</th>
+              <th>Priorité</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let delivery of deliveries">
+              <td>{{ delivery.id.substring(0, 8) }}...</td>
+              <td>{{ delivery.recipientName }}</td>
+              <td>{{ delivery.createdAt | date:'short' }}</td>
+              <td>
+                <span class="badge {{ getStatusBadgeClass(delivery.status) }}">
+                  {{ getStatusText(delivery.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge {{ getPriorityBadgeClass(delivery.priority) }}">
+                  {{ getPriorityText(delivery.priority) }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <a [routerLink]="['/deliveries', delivery.id]" class="btn btn-sm btn-primary" title="Voir les détails">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <a [routerLink]="['/tracking', delivery.id]" class="btn btn-sm btn-info" title="Suivre la livraison">
+                    <i class="fas fa-map-marker-alt"></i>
+                  </a>
+                  <button class="btn btn-sm btn-warning" title="Modifier" (click)="editDelivery(delivery.id)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" title="Annuler" (click)="cancelDelivery(delivery.id)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <nav aria-label="Page navigation" *ngIf="!loading && deliveries.length > 0">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="page === 1">
+            <a class="page-link" href="#" (click)="onPageChange(page - 1); $event.preventDefault()">Précédent</a>
+          </li>
+
+          <li class="page-item" [class.active]="currentPage === p" *ngFor="let p of getPages()">
+            <a class="page-link" href="#" (click)="onPageChange(p); $event.preventDefault()">{{ p }}</a>
+          </li>
+
+          <li class="page-item" [class.disabled]="page * pageSize >= totalItems">
+            <a class="page-link" href="#" (click)="onPageChange(page + 1); $event.preventDefault()">Suivant</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Message si aucune livraison -->
+      <div class="text-center py-5" *ngIf="!loading && deliveries.length === 0">
+        <i class="fas fa-box fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Aucune livraison trouvée</h5>
+        <p class="text-muted">Essayez de modifier vos filtres ou <a routerLink="/deliveries/new">créez une nouvelle livraison</a>.</p>
+      </div>
+
+      <!-- Loader -->
+      <div class="text-center py-5" *ngIf="loading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

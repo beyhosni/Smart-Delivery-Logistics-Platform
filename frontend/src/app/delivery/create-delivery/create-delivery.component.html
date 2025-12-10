@@ -1,0 +1,243 @@
+<div class="create-delivery-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Créer une nouvelle livraison</h6>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <!-- Informations du destinataire -->
+              <div class="col-lg-6 mb-4">
+                <h5 class="mb-3">Informations du destinataire</h5>
+
+                <div class="mb-3">
+                  <label for="recipientName" class="form-label">Nom complet</label>
+                  <input type="text" class="form-control" id="recipientName" formControlName="recipientName" 
+                         [ngClass]="{ 'is-invalid': submitted && f['recipientName'].errors }">
+                  <div *ngIf="submitted && f['recipientName'].errors" class="invalid-feedback">
+                    <div *ngIf="f['recipientName'].errors['required']">Le nom du destinataire est requis</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="recipientPhone" class="form-label">Téléphone</label>
+                  <input type="tel" class="form-control" id="recipientPhone" formControlName="recipientPhone" 
+                         [ngClass]="{ 'is-invalid': submitted && f['recipientPhone'].errors }">
+                  <div *ngIf="submitted && f['recipientPhone'].errors" class="invalid-feedback">
+                    <div *ngIf="f['recipientPhone'].errors['required']">Le numéro de téléphone est requis</div>
+                    <div *ngIf="f['recipientPhone'].errors['pattern']">Veuillez entrer un numéro de téléphone valide (10 chiffres)</div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="recipientEmail" class="form-label">Adresse e-mail</label>
+                  <input type="email" class="form-control" id="recipientEmail" formControlName="recipientEmail" 
+                         [ngClass]="{ 'is-invalid': submitted && f['recipientEmail'].errors }">
+                  <div *ngIf="submitted && f['recipientEmail'].errors" class="invalid-feedback">
+                    <div *ngIf="f['recipientEmail'].errors['required']">L'adresse e-mail est requise</div>
+                    <div *ngIf="f['recipientEmail'].errors['email']">Veuillez entrer une adresse e-mail valide</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Adresse de livraison -->
+              <div class="col-lg-6 mb-4">
+                <h5 class="mb-3">Adresse de livraison</h5>
+
+                <div class="mb-3">
+                  <label for="deliveryStreet" class="form-label">Rue</label>
+                  <input type="text" class="form-control" id="deliveryStreet" formControlName="deliveryStreet" 
+                         [ngClass]="{ 'is-invalid': submitted && f['deliveryStreet'].errors }">
+                  <div *ngIf="submitted && f['deliveryStreet'].errors" class="invalid-feedback">
+                    <div *ngIf="f['deliveryStreet'].errors['required']">La rue est requise</div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="deliveryCity" class="form-label">Ville</label>
+                    <input type="text" class="form-control" id="deliveryCity" formControlName="deliveryCity" 
+                           [ngClass]="{ 'is-invalid': submitted && f['deliveryCity'].errors }">
+                    <div *ngIf="submitted && f['deliveryCity'].errors" class="invalid-feedback">
+                      <div *ngIf="f['deliveryCity'].errors['required']">La ville est requise</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="deliveryPostalCode" class="form-label">Code postal</label>
+                    <input type="text" class="form-control" id="deliveryPostalCode" formControlName="deliveryPostalCode" 
+                           [ngClass]="{ 'is-invalid': submitted && f['deliveryPostalCode'].errors }">
+                    <div *ngIf="submitted && f['deliveryPostalCode'].errors" class="invalid-feedback">
+                      <div *ngIf="f['deliveryPostalCode'].errors['required']">Le code postal est requis</div>
+                      <div *ngIf="f['deliveryPostalCode'].errors['pattern']">Veuillez entrer un code postal valide (5 chiffres)</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="deliveryCountry" class="form-label">Pays</label>
+                    <select class="form-select" id="deliveryCountry" formControlName="deliveryCountry" 
+                            [ngClass]="{ 'is-invalid': submitted && f['deliveryCountry'].errors }">
+                      <option value="France">France</option>
+                      <option value="Belgique">Belgique</option>
+                      <option value="Suisse">Suisse</option>
+                      <option value="Luxembourg">Luxembourg</option>
+                    </select>
+                    <div *ngIf="submitted && f['deliveryCountry'].errors" class="invalid-feedback">
+                      <div *ngIf="f['deliveryCountry'].errors['required']">Le pays est requis</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Adresse de ramassage -->
+              <div class="col-lg-6 mb-4">
+                <h5 class="mb-3">Adresse de ramassage</h5>
+
+                <div class="mb-3">
+                  <label for="pickupStreet" class="form-label">Rue</label>
+                  <input type="text" class="form-control" id="pickupStreet" formControlName="pickupStreet" 
+                         [ngClass]="{ 'is-invalid': submitted && f['pickupStreet'].errors }">
+                  <div *ngIf="submitted && f['pickupStreet'].errors" class="invalid-feedback">
+                    <div *ngIf="f['pickupStreet'].errors['required']">La rue est requise</div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="pickupCity" class="form-label">Ville</label>
+                    <input type="text" class="form-control" id="pickupCity" formControlName="pickupCity" 
+                           [ngClass]="{ 'is-invalid': submitted && f['pickupCity'].errors }">
+                    <div *ngIf="submitted && f['pickupCity'].errors" class="invalid-feedback">
+                      <div *ngIf="f['pickupCity'].errors['required']">La ville est requise</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="pickupPostalCode" class="form-label">Code postal</label>
+                    <input type="text" class="form-control" id="pickupPostalCode" formControlName="pickupPostalCode" 
+                           [ngClass]="{ 'is-invalid': submitted && f['pickupPostalCode'].errors }">
+                    <div *ngIf="submitted && f['pickupPostalCode'].errors" class="invalid-feedback">
+                      <div *ngIf="f['pickupPostalCode'].errors['required']">Le code postal est requis</div>
+                      <div *ngIf="f['pickupPostalCode'].errors['pattern']">Veuillez entrer un code postal valide (5 chiffres)</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-3 mb-3">
+                    <label for="pickupCountry" class="form-label">Pays</label>
+                    <select class="form-select" id="pickupCountry" formControlName="pickupCountry" 
+                            [ngClass]="{ 'is-invalid': submitted && f['pickupCountry'].errors }">
+                      <option value="France">France</option>
+                      <option value="Belgique">Belgique</option>
+                      <option value="Suisse">Suisse</option>
+                      <option value="Luxembourg">Luxembourg</option>
+                    </select>
+                    <div *ngIf="submitted && f['pickupCountry'].errors" class="invalid-feedback">
+                      <div *ngIf="f['pickupCountry'].errors['required']">Le pays est requis</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Détails du colis -->
+              <div class="col-lg-6 mb-4">
+                <h5 class="mb-3">Détails du colis</h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="weight" class="form-label">Poids (kg)</label>
+                    <input type="number" step="0.1" min="0.1" class="form-control" id="weight" formControlName="weight" 
+                           [ngClass]="{ 'is-invalid': submitted && f['weight'].errors }">
+                    <div *ngIf="submitted && f['weight'].errors" class="invalid-feedback">
+                      <div *ngIf="f['weight'].errors['required']">Le poids est requis</div>
+                      <div *ngIf="f['weight'].errors['min']">Le poids doit être d'au moins 0.1 kg</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="priority" class="form-label">Priorité</label>
+                    <select class="form-select" id="priority" formControlName="priority" 
+                            [ngClass]="{ 'is-invalid': submitted && f['priority'].errors }">
+                      <option value="LOW">Basse</option>
+                      <option value="NORMAL">Normale</option>
+                      <option value="HIGH">Haute</option>
+                      <option value="URGENT">Urgente</option>
+                    </select>
+                    <div *ngIf="submitted && f['priority'].errors" class="invalid-feedback">
+                      <div *ngIf="f['priority'].errors['required']">La priorité est requise</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Dimensions (cm)</label>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <input type="number" min="1" class="form-control" placeholder="Longueur" formControlName="length" 
+                             [ngClass]="{ 'is-invalid': submitted && f['length'].errors }">
+                      <div *ngIf="submitted && f['length'].errors" class="invalid-feedback">
+                        <div *ngIf="f['length'].errors['required']">La longueur est requise</div>
+                        <div *ngIf="f['length'].errors['min']">La longueur doit être d'au moins 1 cm</div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="number" min="1" class="form-control" placeholder="Largeur" formControlName="width" 
+                             [ngClass]="{ 'is-invalid': submitted && f['width'].errors }">
+                      <div *ngIf="submitted && f['width'].errors" class="invalid-feedback">
+                        <div *ngIf="f['width'].errors['required']">La largeur est requise</div>
+                        <div *ngIf="f['width'].errors['min']">La largeur doit être d'au moins 1 cm</div>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <input type="number" min="1" class="form-control" placeholder="Hauteur" formControlName="height" 
+                             [ngClass]="{ 'is-invalid': submitted && f['height'].errors }">
+                      <div *ngIf="submitted && f['height'].errors" class="invalid-feedback">
+                        <div *ngIf="f['height'].errors['required']">La hauteur est requise</div>
+                        <div *ngIf="f['height'].errors['min']">La hauteur doit être d'au moins 1 cm</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea class="form-control" id="description" rows="3" formControlName="description"></textarea>
+                </div>
+
+                <div class="mb-3 form-check">
+                  <input type="checkbox" class="form-check-input" id="fragile" formControlName="fragile">
+                  <label class="form-check-label" for="fragile">Fragile</label>
+                </div>
+
+                <div class="mb-3">
+                  <label for="specialInstructions" class="form-label">Instructions spéciales</label>
+                  <textarea class="form-control" id="specialInstructions" rows="2" formControlName="specialInstructions"></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label for="requestedDeliveryTime" class="form-label">Date de livraison souhaitée (optionnel)</label>
+                  <input type="datetime-local" class="form-control" id="requestedDeliveryTime" formControlName="requestedDeliveryTime">
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="error" class="alert alert-danger">
+              {{ error }}
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="button" class="btn btn-secondary me-2" (click)="cancel()">Annuler</button>
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Créer la livraison
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div class="notification-container">
+  <!-- Bouton de notification -->
+  <div class="notification-toggle" (click)="toggleNotifications()">
+    <i class="fas fa-bell"></i>
+    <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+  </div>
+
+  <!-- Liste des notifications -->
+  <div class="notification-dropdown" [class.show]="showNotifications">
+    <div class="notification-header">
+      <h6 class="notification-title">Notifications</h6>
+      <div class="notification-actions">
+        <button class="btn btn-sm btn-outline-primary" (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+          <i class="fas fa-check-double me-1"></i> Tout marquer comme lu
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" (click)="clearNotifications()">
+          <i class="fas fa-times me-1"></i> Effacer
+        </button>
+      </div>
+    </div>
+
+    <div class="notification-list">
+      <div class="notification-empty text-center py-3" *ngIf="notifications.length === 0">
+        <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+        <p class="text-muted">Aucune notification</p>
+      </div>
+
+      <div class="notification-item" 
+           *ngFor="let notification of notifications" 
+           [class.unread]="!notification.read"
+           (click)="markAsRead(notification)">
+        <div class="notification-icon">
+          <i class="fas fa-info-circle" [class.text-primary]="notification.type === 'INFO'"></i>
+          <i class="fas fa-exclamation-triangle" [class.text-warning]="notification.type === 'WARNING'"></i>
+          <i class="fas fa-times-circle" [class.text-danger]="notification.type === 'ERROR'"></i>
+          <i class="fas fa-check-circle" [class.text-success]="notification.type === 'SUCCESS'"></i>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">{{ notification.title }}</div>
+          <div class="notification-message">{{ notification.message }}</div>
+          <div class="notification-time">{{ notification.timestamp | date:'short' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
