@@ -1,0 +1,178 @@
+<div class="courier-dashboard">
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="courier && !loading" class="container-fluid">
+    <!-- Informations sur le livreur -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow">
+          <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Informations du livreur</h6>
+            <div class="dropdown">
+              <button class="btn btn-sm dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown">
+                <span class="badge badge-success">{{ courier.status }}</span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+                <li><a class="dropdown-item" (click)="updateStatus('AVAILABLE')">Disponible</a></li>
+                <li><a class="dropdown-item" (click)="updateStatus('BUSY')">Occupé</a></li>
+                <li><a class="dropdown-item" (click)="updateStatus('ON_BREAK')">En pause</a></li>
+                <li><a class="dropdown-item" (click)="updateStatus('OFFLINE')">Hors ligne</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="d-flex align-items-center mb-3">
+                  <img src="assets/courier-avatar.png" alt="Avatar" class="courier-avatar me-3">
+                  <div>
+                    <h5 class="mb-1">{{ courier.firstName }} {{ courier.lastName }}</h5>
+                    <p class="text-muted mb-0">{{ courier.email }}</p>
+                  </div>
+                </div>
+                <div class="courier-info">
+                  <p class="mb-1"><strong>Téléphone:</strong> {{ courier.phone }}</p>
+                  <p class="mb-1"><strong>Véhicule:</strong> {{ courier.vehicleType }}</p>
+                  <p *ngIf="courier.currentLocation" class="mb-0"><strong>Position:</strong> {{ courier.currentLocation.address || 'Non disponible' }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card bg-light h-100">
+                  <div class="card-body">
+                    <h6 class="text-primary">Statistiques du jour</h6>
+                    <div class="row">
+                      <div class="col-6 mb-2">
+                        <div class="stat-card">
+                          <div class="stat-number">{{ stats.completedToday }}</div>
+                          <div class="stat-label">Livraisons aujourd'hui</div>
+                        </div>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <div class="stat-card">
+                          <div class="stat-number">{{ stats.inProgress }}</div>
+                          <div class="stat-label">En cours</div>
+                        </div>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <div class="stat-card">
+                          <div class="stat-number">{{ formatMinutes(stats.averageDeliveryTime) }}</div>
+                          <div class="stat-label">Temps moyen</div>
+                        </div>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <div class="stat-card">
+                          <div class="stat-number">{{ stats.earnings }}€</div>
+                          <div class="stat-label">Gains du jour</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Livraisons en cours -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card shadow">
+          <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Livraisons en cours</h6>
+          </div>
+          <div class="card-body p-0">
+            <div *ngIf="activeDeliveries.length === 0" class="text-center py-4 text-muted">
+              Aucune livraison en cours
+            </div>
+            <div *ngIf="activeDeliveries.length > 0" class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Adresse de ramassage</th>
+                    <th>Adresse de livraison</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let delivery of activeDeliveries">
+                    <td>{{ delivery.id.substring(0, 8) }}...</td>
+                    <td>{{ delivery.pickupAddress.address }}</td>
+                    <td>{{ delivery.deliveryAddress.address }}</td>
+                    <td>
+                      <span class="badge badge-primary">{{ delivery.status }}</span>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-primary" 
+                              (click)="viewDeliveryDetails(delivery.id)">
+                        <i class="fas fa-eye me-1"></i>
+                        Détails
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Livraisons récentes -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow">
+          <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Livraisons récentes</h6>
+            <button type="button" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-list me-1"></i>
+              Voir tout
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div *ngIf="completedDeliveries.length === 0" class="text-center py-4 text-muted">
+              Aucune livraison récente
+            </div>
+            <div *ngIf="completedDeliveries.length > 0" class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Adresse de livraison</th>
+                    <th>Temps de livraison</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let delivery of completedDeliveries">
+                    <td>{{ delivery.id.substring(0, 8) }}...</td>
+                    <td>{{ delivery.deliveryAddress.address }}</td>
+                    <td>{{ formatMinutes(delivery.deliveryTime) }}</td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-primary" 
+                              (click)="viewDeliveryDetails(delivery.id)">
+                        <i class="fas fa-eye me-1"></i>
+                        Détails
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

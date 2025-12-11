@@ -1,0 +1,89 @@
+<div class="map-container">
+  <div id="tracking-map" class="map"></div>
+
+  <!-- Contrôles de la carte -->
+  <div class="map-controls">
+    <div class="card bg-white shadow-sm">
+      <div class="card-body p-2">
+        <h6 class="card-title mb-3">Contrôles de suivi</h6>
+
+        <!-- Bouton pour centrer sur la position actuelle -->
+        <button type="button" class="btn btn-sm btn-primary w-100 mb-2" 
+                (click)="centerOnCurrentLocation()" 
+                [disabled]="!currentPosition">
+          <i class="fas fa-crosshairs me-1"></i>
+          Centrer sur la position
+        </button>
+
+        <!-- Informations sur la position actuelle -->
+        <div *ngIf="currentPosition" class="mb-2">
+          <small class="text-muted">Position actuelle:</small>
+          <div class="small">
+            <strong>Lat:</strong> {{ currentPosition.lat | number:'1.6' }}<br>
+            <strong>Lng:</strong> {{ currentPosition.lng | number:'1.6' }}
+          </div>
+        </div>
+
+        <!-- Informations sur la livraison -->
+        <div class="mb-2">
+          <small class="text-muted">ID de livraison:</small>
+          <div class="small font-weight-bold">{{ deliveryId }}</div>
+        </div>
+
+        <!-- Statut de la livraison -->
+        <div class="mb-2">
+          <small class="text-muted">Statut:</small>
+          <div class="small">
+            <span class="badge badge-primary">En cours</span>
+          </div>
+        </div>
+
+        <!-- Progression -->
+        <div class="mb-2">
+          <small class="text-muted">Progression:</small>
+          <div class="progress mt-1" style="height: 10px;">
+            <div class="progress-bar bg-success" role="progressbar" 
+                 [style.width.%]="progressPercentage || 0">
+              {{ progressPercentage || 0 }}%
+            </div>
+          </div>
+        </div>
+
+        <!-- Temps estimé -->
+        <div class="mb-2">
+          <small class="text-muted">Temps estimé:</small>
+          <div class="small font-weight-bold">{{ estimatedTime || 'Calcul en cours...' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Légende de la carte -->
+  <div class="map-legend">
+    <div class="card bg-white shadow-sm">
+      <div class="card-body p-2">
+        <h6 class="card-title mb-3">Légende</h6>
+
+        <div class="legend-item mb-2">
+          <img src="assets/pickup-icon.png" alt="Ramassage" class="legend-icon">
+          <span class="legend-text">Point de ramassage</span>
+        </div>
+
+        <div class="legend-item mb-2">
+          <img src="assets/delivery-icon.png" alt="Livraison" class="legend-icon">
+          <span class="legend-text">Point de livraison</span>
+        </div>
+
+        <div class="legend-item mb-2">
+          <img src="assets/courier-icon.png" alt="Livreur" class="legend-icon">
+          <span class="legend-text">Position du livreur</span>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-line"></div>
+          <span class="legend-text">Itinéraire</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
