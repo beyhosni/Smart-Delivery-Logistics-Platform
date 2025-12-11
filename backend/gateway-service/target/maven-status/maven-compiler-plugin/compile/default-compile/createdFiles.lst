@@ -1,0 +1,2 @@
+com\smartdelivery\gateway\GatewayServiceApplication.class
+com\smartdelivery\gateway\controller\FallbackController.class
