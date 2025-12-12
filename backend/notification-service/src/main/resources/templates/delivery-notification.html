@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Smart Delivery - ' + ${notification.subject}">Notification de livraison</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .delivery-details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .delivery-details h3 {
+            margin-top: 0;
+            color: #4a90e2;
+        }
+        .detail-row {
+            margin-bottom: 8px;
+        }
+        .detail-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-created { background-color: #f0f0f0; color: #333; }
+        .status-dispatched { background-color: #e6f2ff; color: #0066cc; }
+        .status-in-transit { background-color: #fff2cc; color: #cc9900; }
+        .status-delivered { background-color: #e6ffed; color: #009933; }
+        .status-delayed { background-color: #ffe6e6; color: #cc0000; }
+
+        .tracking-progress {
+            margin: 20px 0;
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .progress-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .step-icon.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+        .step-icon.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .step-content {
+            flex: 1;
+        }
+        .step-title {
+            font-weight: bold;
+        }
+        .step-time {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Smart Delivery</h1>
+        <p th:text="${notification.subject}">Mise à jour de votre livraison</p>
+    </div>
+
+    <div class="content">
+        <p th:utext="${notification.content}">Votre livraison est en cours.</p>
+
+        <div class="delivery-details" th:if="${deliveryId}">
+            <h3>Détails de la livraison</h3>
+            <div class="detail-row">
+                <span class="detail-label">ID de livraison:</span>
+                <span th:text="${deliveryId}">ID-12345</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Statut actuel:</span>
+                <span th:class="${'status-badge status-' + #strings.toLowerCase(notification.type?.toString())}" 
+                      th:text="${notification.type}">En cours de livraison</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span th:text="${#temporals.format(notification.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2023 12:00</span>
+            </div>
+        </div>
+
+        <!-- Suivi de progression -->
+        <div class="tracking-progress">
+            <h3>Suivi de votre livraison</h3>
+
+            <div class="progress-step">
+                <div class="step-icon completed">1</div>
+                <div class="step-content">
+                    <div class="step-title">Commande confirmée</div>
+                    <div class="step-time">01/01/2023 10:00</div>
+                </div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon completed" th:classappend="${notification.type?.toString() == 'DELIVERY_DISPATCHED' or notification.type?.toString() == 'DELIVERY_IN_TRANSIT' or notification.type?.toString() == 'DELIVERY_DELIVERED' ? 'active' : ''}">2</div>
+                <div class="step-content">
+                    <div class="step-title">Préparation en cours</div>
+                    <div class="step-time" th:if="${notification.type?.toString() == 'DELIVERY_DISPATCHED' or notification.type?.toString() == 'DELIVERY_IN_TRANSIT' or notification.type?.toString() == 'DELIVERY_DELIVERED'}">01/01/2023 12:00</div>
+                </div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon" th:classappend="${notification.type?.toString() == 'DELIVERY_IN_TRANSIT' or notification.type?.toString() == 'DELIVERY_DELIVERED' ? 'active' : ''}">3</div>
+                <div class="step-content">
+                    <div class="step-title">En cours de livraison</div>
+                    <div class="step-time" th:if="${notification.type?.toString() == 'DELIVERY_IN_TRANSIT' or notification.type?.toString() == 'DELIVERY_DELIVERED'}">01/01/2023 14:00</div>
+                </div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon" th:classappend="${notification.type?.toString() == 'DELIVERY_DELIVERED' ? 'active' : ''}">4</div>
+                <div class="step-content">
+                    <div class="step-title">Livré</div>
+                    <div class="step-time" th:if="${notification.type?.toString() == 'DELIVERY_DELIVERED'}">01/01/2023 16:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#" class="button">Suivre ma livraison</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2023 Smart Delivery. Tous droits réservés.</p>
+        <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>
+        <p>Pour contacter le service client, veuillez utiliser le formulaire sur notre site web.</p>
+    </div>
+</body>
+</html>
